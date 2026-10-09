@@ -80,6 +80,7 @@
     }).addTo(map);
 
     const allPoints = [S.you.latlng, S.her.latlng, ...S.pins.map(p => p.latlng)];
+    if (S.next?.latlng) allPoints.push(S.next.latlng);
     const overview = () => map.flyToBounds(allPoints, { padding: [60, 60], duration: 1.4, maxZoom: 6 });
     map.fitBounds(allPoints, { padding: [60, 60], maxZoom: 6 });
 
@@ -131,7 +132,7 @@
     // Pins
     const markers = S.pins.map((p, i) => {
       const m = L.marker(p.latlng, {
-        icon: L.divIcon({ className: "", html: `<div class="pin"><span>${i + 1}</span></div>`, iconSize: [34, 34], iconAnchor: [17, 34] }),
+        icon: L.divIcon({ className: "", html: `<div class="pin${p.proud ? " proud" : ""}"><span>${p.proud ? "★" : i + 1}</span></div>`, iconSize: [34, 34], iconAnchor: [17, 34] }),
         zIndexOffset: 1000 + i,
         keyboard: true,
         title: p.title
@@ -140,15 +141,27 @@
       return m;
     });
 
+    // "Next stop" marker
+    let nextMarker = null;
+    if (S.next?.latlng) {
+      nextMarker = L.marker(S.next.latlng, {
+        icon: L.divIcon({ className: "", html: '<div class="pin next"><span>♥</span></div>', iconSize: [34, 34], iconAnchor: [17, 34] }),
+        zIndexOffset: 2000,
+        title: S.next.title
+      }).addTo(map);
+      nextMarker.on("click", () => show(steps.length - 1));
+    }
+
     // Route drawn in order of the story when the map first scrolls into view
     const routePts = [];
-    S.pins.forEach((p, i) => {
+    const stops = [...S.pins, ...(S.next?.latlng ? [S.next] : [])];
+    stops.forEach((p, i) => {
       if (i === 0) { routePts.push(p.latlng); return; }
-      const prev = S.pins[i - 1].latlng;
+      const prev = stops[i - 1].latlng;
       if (km(prev, p.latlng) < 0.05) return;
-      routePts.push(...arc(prev, p.latlng, 60, 0.18).slice(1));
+      routePts.push(...arc(prev, p.latlng, 60, 0.08).slice(1));
     });
-    const route = L.polyline([], { color: "#c8506a", weight: 4, opacity: .85, lineCap: "round", lineJoin: "round", interactive: false }).addTo(map);
+    const route = L.polyline([], { color: "#c8506a", weight: 3, opacity: .6, lineCap: "round", lineJoin: "round", interactive: false }).addTo(map);
     function drawRoute() {
       if (reduceMotion) { route.setLatLngs(routePts); return; }
       let i = 0;
@@ -160,7 +173,12 @@
       requestAnimationFrame(step);
     }
     new IntersectionObserver((entries, obs) => {
-      if (entries[0].isIntersecting) { map.invalidateSize(); drawRoute(); obs.disconnect(); }
+      if (entries[0].isIntersecting) {
+        map.invalidateSize();
+        if (current < 0) map.fitBounds(allPoints, { padding: [60, 60], maxZoom: 6 });
+        drawRoute();
+        obs.disconnect();
+      }
     }, { threshold: 0.4 }).observe($("#map"));
 
     // Story card
@@ -171,16 +189,21 @@
     function show(i) {
       current = i;
       const s = steps[i];
-      markers.forEach((m, j) => m.getElement()?.querySelector(".pin")?.classList.toggle("active", j === i));
-      $(".card-num", card).textContent = s.isNext ? "Soon" : `Stop ${i + 1}`;
-      $(".card-date", card).textContent = s.isNext ? "" : [s.date, s.place].filter(Boolean).join(" · ");
+      markers.forEach((m, j) => {
+        m.getElement()?.querySelector(".pin")?.classList.toggle("active", j === i);
+        m.setZIndexOffset(j === i ? 5000 : 1000 + j);
+      });
+      nextMarker?.getElement()?.querySelector(".pin")?.classList.toggle("active", !!s.isNext);
+      $(".card-num", card).textContent = s.isNext ? "Soon" : s.proud ? "★ Proud moment" : `Stop ${i + 1}`;
+      $(".card-date", card).textContent = s.isNext ? (s.place || "") : [s.date, s.place].filter(Boolean).join(" · ");
       $(".card-title", card).textContent = s.title;
       $(".card-text", card).textContent = s.text || "";
       $(".card-count", card).textContent = `${i + 1} / ${steps.length}`;
       $(".card-prev", card).disabled = i === 0;
       $(".card-next", card).disabled = i === steps.length - 1;
       withPhoto($(".card-photo", card), s.isNext ? null : s.photo);
-      $(".card-photo", card).hidden = !!s.isNext;
+      $(".card-photo", card).hidden = !s.photo || !!s.isNext;
+      card.classList.toggle("compact", !s.photo || !!s.isNext);
 
       clearInterval(countdownTimer);
       const cd = $(".card-countdown", card);
@@ -199,7 +222,7 @@
       card.hidden = false;
       $("#tour").hidden = true;
 
-      if (s.isNext) overview();
+      if (s.isNext && !s.latlng) overview();
       else {
         const mobile = innerWidth <= 720;
         const z = s.zoom || 12;
@@ -218,6 +241,7 @@
       $("#tour").hidden = false;
       $("#tour").textContent = "Replay our route";
       markers.forEach(m => m.getElement()?.querySelector(".pin")?.classList.remove("active"));
+      nextMarker?.getElement()?.querySelector(".pin")?.classList.remove("active");
       overview();
     });
     addEventListener("keydown", e => {
@@ -241,7 +265,7 @@
     el.className = "polaroid";
     el.innerHTML = '<div class="inner"><div class="face front"><div class="ph"><img alt="" draggable="false"></div><div class="label"></div></div><div class="face back"><p></p></div></div>';
     withPhoto($(".ph", el), p.photo);
-    $(".label", el).textContent = p.label || "";
+    $(".label", el).textContent = p.label || "\u00a0";
     $(".back p", el).textContent = p.caption || "";
     el.style.setProperty("--r", `${(Math.random() * 14 - 7).toFixed(1)}deg`);
     el.dataset.jx = Math.random();
