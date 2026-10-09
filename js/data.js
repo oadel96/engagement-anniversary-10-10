@@ -69,7 +69,7 @@ window.STORY = {
     { photo: "img/c2de8818-2e60-4d48-afdf-b976f5791a69.jpg", label: "", caption: "I adore you" },
     { photo: "img/c6746a87-3cd2-4ffb-8f43-91cca5d5ddde.jpg", label: "", caption: "I love you" },
     { photo: "img/b2c94a77-88d6-401b-9442-bc2a7cd570f5.jpg", label: "", caption: "I cherish you" },
-    { photo: "img/fb27602d-8409-4c5b-8184-ee24ddb962b2.jpg", label: "", caption: "I adore you" },
+    { photo: "img/fb27602d-8409-4c5b-8184-ee24ddb962b2.jpg", label: "", caption: "I choose you" },
     { photo: "img/378820c8-d3f3-44b9-ae1b-3e73fb8a4852.jpg", label: "", caption: "I'm so lucky to have you" }
   ],
 
