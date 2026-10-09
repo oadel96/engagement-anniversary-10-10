@@ -74,14 +74,14 @@ window.STORY = {
   ],
 
   // Ending. Blank line = new paragraph.
-  message: `It has been one hell of a year since our engagement day — ups and downs, from events, parties and home renovation to distance, miscommunication and fights. But the most important part is that we go through it all together.
+  message: `It has been one hell of a year since our engagement day full of ups and downs, from events, parties and home renovation to distance, miscommunication and fights. But the most important part is that we go through it all together.
 
 I can't fully express how I feel about you, about us, but all I know is that I want us to be together forever. In a million lifetimes, I would still choose to be with you.
 
-You're so precious to me, and I love you in ways you can't imagine. You're my present and my future — there isn't a single point in time where I can imagine you not being in it. I will live for us, fight for us, and do everything for us to be together, my love.
+You're so precious to me, and I love you in ways you can't imagine. You're my present, my future and there isn't a single point in time where I can imagine you not being in it. I will live for us, fight for us, and do everything for us to be together, my love.
 
 I thank God every day for having you. I'm really, really grateful for you, habebty. I love you, always and forever.
 
 I miss you.`,
-  signature: "— Omar"
+  signature: "Omar"
 };
