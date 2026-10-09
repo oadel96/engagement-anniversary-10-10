@@ -202,21 +202,30 @@ button { font: inherit; cursor: pointer; }
 .card-close {
   position: absolute; top: 10px; right: 10px; z-index: 2;
   width: 34px; height: 34px; border-radius: 50%;
-  border: 0; background: rgba(255,255,255,.9); font-size: 1.4rem; line-height: 1;
+  border: 0; background: rgba(255,255,255,.9); color: var(--ink); font-size: 1.4rem; line-height: 1; z-index: 3;
 }
 .card-photo {
   flex: 1 1 auto;
   min-height: 140px;
+  overflow: hidden;
   background: linear-gradient(135deg, var(--rose-soft), #f6e3c4);
   position: relative;
 }
-.card-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; display: block; position: absolute; inset: 0; }
+/* Whole photo visible, blurred copy of itself fills the gaps */
+.card-photo::before {
+  content: "";
+  position: absolute; inset: -30px;
+  background: var(--bg) center / cover no-repeat;
+  filter: blur(22px) brightness(.85) saturate(1.1);
+}
+.card-photo img { width: 100%; height: 100%; object-fit: contain; display: block; position: absolute; inset: 0; z-index: 1; }
+.card-photo.nophoto::before { display: none; }
 .card-photo.nophoto img { display: none; }
 .card-photo.nophoto::after {
   content: "♥"; position: absolute; inset: 0; display: grid; place-items: center;
   font-size: 3rem; color: rgba(200, 80, 106, .4);
 }
-.card-body { padding: 18px 20px 14px; }
+.card-body { padding: 18px 20px 14px; flex: 0 0 auto; }
 .card-meta { margin: 0 0 4px; font-size: .78rem; color: var(--rose); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; display: flex; flex-wrap: wrap; gap: 2px 10px; }
 .card-title { font-size: 1.5rem; }
 .card-text { color: var(--ink-soft); margin: 8px 0 0; }
@@ -224,7 +233,7 @@ button { font: inherit; cursor: pointer; }
 .card-nav { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; }
 .card-nav button {
   width: 44px; height: 44px; border-radius: 50%;
-  border: 1px solid var(--rose-soft); background: #fff; color: var(--rose-deep); font-size: 1.2rem;
+  border: 1px solid var(--rose-soft); background: #fff; color: var(--rose-deep); font-size: 1.2rem; padding: 0;
 }
 .card-nav button:disabled { opacity: .3; cursor: default; }
 .card-count { font-size: .85rem; color: var(--ink-soft); }
@@ -232,10 +241,17 @@ button { font: inherit; cursor: pointer; }
 @media (max-width: 720px) {
   #journey, #memories { padding: 64px 12px; }
   .map-wrap { border-radius: 18px; }
-  #map { height: 82svh; }
-  .card { left: 10px; right: 10px; top: auto; bottom: 10px; width: auto; max-height: 62%; }
-  .card.compact { bottom: 10px; }
-  .card-photo { min-height: 120px; height: 160px; flex: 0 0 auto; }
+  #map { height: 86svh; min-height: 520px; }
+  /* Card fills the lower ~72% of the map; pin shows in the space above */
+  .card { left: 8px; right: 8px; top: 28%; bottom: 8px; width: auto; border-radius: 16px; }
+  .card.compact { top: auto; bottom: 8px; }
+  .card-photo { min-height: 0; }
+  .card-body { padding: 12px 16px 10px; }
+  .card-meta { font-size: .68rem; margin-bottom: 2px; }
+  .card-title { font-size: 1.2rem; line-height: 1.25; }
+  .card-text { margin-top: 4px; font-size: .92rem; }
+  .card-nav { margin-top: 10px; }
+  .card-nav button { width: 40px; height: 40px; }
 }
 
 /* ---------- Polaroid wall ---------- */

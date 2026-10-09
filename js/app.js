@@ -31,6 +31,8 @@
   function withPhoto(wrap, src) {
     const img = $("img", wrap);
     wrap.classList.remove("nophoto");
+    // Absolute URL: a relative one in a CSS variable resolves against css/, not the page.
+    wrap.style.setProperty("--bg", src ? `url("${new URL(src, location.href).href}")` : "none");
     if (!src) { wrap.classList.add("nophoto"); img.removeAttribute("src"); return; }
     img.onerror = () => wrap.classList.add("nophoto");
     img.src = src;
@@ -228,7 +230,8 @@
         const z = s.zoom || 12;
         // Offset the target so the pin isn't hidden behind the card.
         const pt = map.project(s.latlng, z);
-        const shifted = mobile ? pt.add([0, map.getSize().y * 0.25]) : pt.add([170, 0]);
+        // Mobile: pin sits in the strip above the card (top 28% of the map).
+        const shifted = mobile ? pt.add([0, map.getSize().y * 0.36]) : pt.add([170, 0]);
         map.flyTo(map.unproject(shifted, z), z, { duration: 1.6 });
       }
     }
